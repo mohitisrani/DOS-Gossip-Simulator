@@ -20,8 +20,8 @@ defmodule Grid do
     case droids do
       [] -> ""
       [_] -> ""
-      _ -> Task.start_link(GenServer,:cast, [a,{:add_random_neighbor, b}])
-           Task.start_link(GenServer,:cast, [b,{:add_random_neighbor, a}])
+      _ -> GenServer.cast(a,{:add_random_neighbor, b})
+           GenServer.cast(b,{:add_random_neighbor, a})
            randomify_mates(droids)
     end
   end
@@ -35,35 +35,36 @@ defmodule Grid do
     {:noreply,state ++ [new_mate]}
   end
 
-  def handle_cast({:message, _received}, [count,sent,size,x,y| mates ] ) do
+  def handle_cast({:message_gossip, _received}, [count,sent,size,x,y| mates ] ) do
     case count do
       0 ->GenServer.cast(Master,{:received, [{x,y}]}) 
-          Task.start_link(Grid,:gossip,[x,y,mates,self()])
+          gossip(x,y,mates,self())
       _ ->""
     end 
     {:noreply,[count+1 ,sent,size, x , y | mates]}  
   end
   
-  def handle_call(:run, _from, [count,sent,size | t]) do
-    run =
-      case rem(sent,100) do
-        0 -> 
-          sent != 10000
-        _ ->
-          count < 10 
-      end
-    {:reply, run, [count,sent+1,size | t]}
+  def handle_cast({:continue_gossip, [x,y,mates,pid]}, [count,sent,size | t]) do
+    # run =
+    #   case rem(sent,100) do
+    #     0 -> 
+    #       sent != 10000
+    #     _ ->
+    #       count < 10 
+    #   end
+
+    case count < 11 do
+      true -> gossip(x,y,mates,pid)
+      false -> GenServer.cast(Master,{:hibernated, [{x,y}]})
+    end
+    
+    {:noreply,[count ,sent+1,size | t]}
   end
 
   def gossip(x,y,mates,pid) do
-    case GenServer.call(pid , :run) do
-      true -> the_chosen_one(mates)
-              |> GenServer.cast({:message, :_sending})
-              gossip(x,y,mates,pid)
-      false-> 
-              GenServer.cast(Master,{:hibernated, [{x,y}]})
-              
-    end
+    the_chosen_one(mates)
+    |> GenServer.cast({:message_gossip, :_sending})
+    GenServer.cast(pid,{:continue_gossip, [x,y,mates,pid]})   
   end
     
     

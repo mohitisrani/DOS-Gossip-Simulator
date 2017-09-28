@@ -9,7 +9,7 @@ defmodule Gossip do
   end
 
   def handle_cast({:received, droid }, [received, hibernated, r_count, h_count]) do
-    case rem(r_count,100)==0 do
+    case rem(r_count,101)==0 do
       true -> Task.start(Gossip,:draw_image,[received,hibernated,r_count])
       false ->" "
     end
@@ -40,14 +40,14 @@ defmodule Gossip do
 
 
   def test() do
-    received = [{5,1}]
+    received = [{99,99}]
 
     image = :egd.create(100, 100)
     fill1 = :egd.color({0,127,0})    
-    font = :egd_font.load({:courier,[:bold,:italic],6})
+    #font = :egd_font.glyph({:courier,[:bold,:italic],6})
     Enum.each received, fn({first,second}) ->
-      #:egd.filledRectangle(image, {first*4-2, second*4-2},{first*4,second*4}, fill1)
-      :egd.text(image, {first*4-2, second*4-2}, Font, "HELLO", fill1)
+      :egd.filledRectangle(image, {first-1, second-1},{first,second}, fill1)
+     # :egd.text(image, {first*4-2, second*4-2}, Font, "HELLO", fill1)
     end
      
     rendered_image = :egd.render(image)
