@@ -1,0 +1,5 @@
+%{"chartkick": {:hex, :chartkick, "0.0.2", "756fed3f299a61b1ebfc6ce79945e31dca5a4cf4e148d43e5d6202628559c11a", [], [{:poison, "~> 1.5", [hex: :poison, repo: "hexpm", optional: false]}, {:uuid, "~> 1.0", [hex: :uuid, repo: "hexpm", optional: false]}], "hexpm"},
+  "egd": {:git, "https://github.com/erlang/egd.git", "ee2b51351f43223fd7f7c47d042ba6edee6c33d6", [tag: "0.9.1"]},
+  "percept": {:git, "https://github.com/erlang/percept.git", "44ee3ca98bcd37dfab691072e953131107ebec55", []},
+  "poison": {:hex, :poison, "1.5.2", "560bdfb7449e3ddd23a096929fb9fc2122f709bcc758b2d5d5a5c7d0ea848910", [], [], "hexpm"},
+  "uuid": {:hex, :uuid, "1.1.7", "007afd58273bc0bc7f849c3bdc763e2f8124e83b957e515368c498b641f7ab69", [], [], "hexpm"}}
