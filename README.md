@@ -1,15 +1,16 @@
+# Gossip Simulator
+Gossip type algorithms can be used both for group communication and for aggregate computation. The goal of this project is to determine the convergence of such algorithms through a simulator based on actors written in Elixir. Since actors in Elixir are fully asynchronous, the particular type of Gossip implemented is the so called Asynchronous Gossip.
 
+## Algorithms and Topologies included:
 
-**Algorithms and Topologies included:**
-
-Gossip:
+### Gossip:
 
 1. Line
 2. Full Network
 3. Grid
 4. Imperfect Grid
 
-Push-sum:
+### Push-sum:
 
 1. Line
 2. Full Network
