@@ -82,7 +82,7 @@ defmodule Gossip do
   def handle_cast({:deactivate, percentage }, [_cast_num,_received, _hibernated,_prev_droid, _prev_droid_2, _r_count, _h_count,size, _draw_every,_init_time, droids, dead_droids]) do
     num_deactivate = round(size*size*percentage / 100)
     to_deactivate = Enum.take_random(droids,num_deactivate)
-    IO.puts("deactivated: #{inspect to_deactivate} ms")
+    IO.puts("deactivated: #{inspect to_deactivate} ")
     Enum.each to_deactivate, fn( droid ) -> 
       GenServer.cast(droid,{:deactivate, :you_are_getting_deactivated })
     end
@@ -118,7 +118,7 @@ defmodule Gossip do
     #draw_image(received,hibernated,1,droid,prev_droid, prev_droid_2,size,cast_num,dead_droids)
     end_time = DateTime.utc_now
     convergence_time=DateTime.diff(end_time,init_time,:millisecond)
-    IO.puts("Convergence time: #{convergence_time}")
+    IO.puts("Convergence time: #{convergence_time} ms")
     draw_image(received,hibernated,1,droid,prev_droid, prev_droid_2,size,cast_num, dead_droids)
     {:noreply,[cast_num+1,received, hibernated ++ droid,droid, prev_droid, r_count, h_count + 1,size,draw_every,init_time,droids,dead_droids]}
   end

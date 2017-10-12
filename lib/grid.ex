@@ -38,6 +38,7 @@ defmodule Grid do
                   new_mate = GenServer.call(Master,:handle_node_failure)
                   GenServer.cast(self(),{:remove_mate,the_one})
                   GenServer.cast(self(),{:add_new_mate,new_mate})
+                  GenServer.cast(new_mate,{:add_new_mate,droid_name(x,y)})
                   GenServer.cast(self(),{:retry_push_sum,{s,w,pid}})
     end
   end
@@ -52,7 +53,7 @@ defmodule Grid do
 
   # GOSSIP - RECIEVE Main 
   def handle_cast({:message_gossip, _received}, [status,count,sent,size,x,y| mates ] = state ) do
-    case count < 11 do
+    case count < 100 do
       true -> 
         GenServer.cast(Master,{:received, [{x,y}]}) 
         gossip(x,y,mates,self())
@@ -63,23 +64,23 @@ defmodule Grid do
   end
 
   # GOSSIP  - SEND Main
-  def gossip(x,y,mates,pid) do
-    the_one = the_chosen_one(mates)
-    case GenServer.call(the_one,:is_active) do
-      Active -> GenServer.cast(the_one, {:message_gossip, :_sending})
-                IO.puts("a;sdlkfj")
-      ina_xy -> GenServer.cast(Master,{:droid_inactive, ina_xy})
-                new_mate = GenServer.call(Master,:handle_node_failure)
-                GenServer.cast(self(),{:remove_mate,the_one})
-                GenServer.cast(self(),{:add_new_mate,new_mate})
-                GenServer.cast(self(),{:retry_gossip,{pid}})
-    end
-  end
-
   # def gossip(x,y,mates,pid) do
   #   the_one = the_chosen_one(mates)
-  #   GenServer.cast(the_one, {:message_gossip, :_sending})
+  #   case GenServer.call(the_one,:is_active) do
+  #     Active -> GenServer.cast(the_one, {:message_gossip, :_sending})
+  #     ina_xy -> GenServer.cast(Master,{:droid_inactive, ina_xy})
+  #               new_mate = GenServer.call(Master,:handle_node_failure)
+  #               GenServer.cast(self(),{:remove_mate,the_one})
+  #               GenServer.cast(self(),{:add_new_mate,new_mate})
+  #               GenServer.cast(new_mate,{:add_new_mate,droid_name(x,y)})
+  #               GenServer.cast(self(),{:retry_gossip,{pid}})
+  #   end
   # end
+
+  def gossip(x,y,mates,pid) do
+    the_one = the_chosen_one(mates)
+    GenServer.cast(the_one, {:message_gossip, :_sending})
+  end
 
     # GOSSIP - HANDLE FAILURE SEND retry in case the Node is inactive
     def handle_cast({:retry_gossip, {pid}}, [status,count,sent,size,x,y| mates ] = state ) do   

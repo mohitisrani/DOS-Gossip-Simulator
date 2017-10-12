@@ -38,13 +38,9 @@ defmodule Full do
     case the_one == droid_name(x) do
       true -> push_sum(s,w,x,n,i,j)
       false ->
-        #IO.puts("#{inspect the_one} #{inspect droid_name(x)}")
         case GenServer.call(the_one,:is_active) do
           Active -> GenServer.cast(the_one,{:message_push_sum,{ s,w}})
           ina_xy -> GenServer.cast(Master,{:droid_inactive, ina_xy})
-                    #new_mate = GenServer.call(Master,:handle_node_failure)
-                    #GenServer.cast(self(),{:remove_mate,the_one})
-                    #GenServer.cast(self(),{:add_new_mate,new_mate})
                     push_sum(s,w,x,n,i,j)
         end
     end
@@ -59,7 +55,7 @@ defmodule Full do
     length = round(Float.ceil(:math.sqrt(n)))
     i = rem(x-1,length) + 1
     j = round(Float.floor(((x-1)/length))) + 1
-    case count < 11 do
+    case count < 100 do
       true ->  GenServer.cast(Master,{:received, [{i,j}]}) 
                gossip(x,self(),n,i,j)
       false -> GenServer.cast(Master,{:hibernated, [{i,j}]})
@@ -75,11 +71,7 @@ defmodule Full do
       false ->    
         case GenServer.call(the_one,:is_active) do
           Active -> GenServer.cast(the_one, {:message_gossip, :_sending})
-                    #IO.puts("")  ######### Solve this mystery ##########################33-------------------doesn't work on removing IO.puts
-          ina_xy -> GenServer.cast(Master,{:droid_inactive, ina_xy})
-                    #new_mate = GenServer.call(Master,:handle_node_failure)
-                    #GenServer.cast(self(),{:remove_mate,the_one})
-                    #GenServer.cast(self(),{:add_new_mate,new_mate})
+                    ina_xy -> GenServer.cast(Master,{:droid_inactive, ina_xy})
                     gossip(x,pid, n,i,j)
         end
       end

@@ -20,20 +20,20 @@ defmodule Line do
     j = round(Float.floor(((x-1)/length))) + 1
     GenServer.cast(Master,{:received, [{i,j}]})
       case abs(((s+rec_s)/(w+rec_w))-prev_s_w) < :math.pow(10,-10) do
-        false ->push_sum((s+rec_s)/2,(w+rec_w)/2,mates,self(),i,j) 
+        false ->push_sum(x,(s+rec_s)/2,(w+rec_w)/2,mates,self(),i,j) 
                 {:noreply,[status,count+1, 0, (s+rec_s)/(w+rec_w), term, (s+rec_s)/2, (w+rec_w)/2, n, x  | mates]}
         true -> 
           case streak + 1 == 3 do
             true ->  GenServer.cast(Master,{:hibernated, [{i,j}]})
                       {:noreply,[status,count+1, streak+1, (s+rec_s)/(w+rec_w), 1, (s+rec_s), (w+rec_w), n, x  | mates]}
-            false -> push_sum((s+rec_s)/2, (w+rec_w)/2, mates, self(), i, j)
+            false -> push_sum(x,(s+rec_s)/2, (w+rec_w)/2, mates, self(), i, j)
                       {:noreply,[status,count+1, streak+1, (s+rec_s)/(w+rec_w), 0, (s+rec_s)/2, (w+rec_w)/2, n, x  | mates]}
           end
       end
   end
   
   # PUSHSUM  - SEND MAIN
-  def push_sum(s,w,mates,pid ,i,j) do
+  def push_sum(x,s,w,mates,pid ,i,j) do
     the_one = the_chosen_one(mates)
     case GenServer.call(the_one,:is_active) do
       Active -> GenServer.cast(the_one,{:message_push_sum,{ s,w}})
@@ -41,13 +41,14 @@ defmodule Line do
                 new_mate = GenServer.call(Master,:handle_node_failure)
                 GenServer.cast(self(),{:remove_mate,the_one})
                 GenServer.cast(self(),{:add_new_mate,new_mate})
-                GenServer.cast(self(),{:retry_push_sum,{s,w,pid,i,j}})
+                GenServer.cast(new_mate,{:add_new_mate,droid_name(x)})
+                GenServer.cast(self(),{:retry_push_sum,{x,s,w,pid,i,j}})
     end
   end
 
     # PUSHSUM - HANDLE FAILURE SEND retry - in case the Node is inactive
-    def handle_cast({:retry_push_sum, {rec_s, rec_w,pid,i,j} }, [status,count,streak,prev_s_w,term, s ,w, n, x | mates ] = state ) do
-      push_sum(rec_s,rec_w,mates,pid ,i,j)
+    def handle_cast({:retry_push_sum, {x,rec_s, rec_w,pid,i,j} }, [status,count,streak,prev_s_w,term, s ,w, n, x | mates ] = state ) do
+      push_sum(x,rec_s,rec_w,mates,pid ,i,j)
       {:noreply,state}
     end
 
@@ -75,6 +76,7 @@ defmodule Line do
                 new_mate = GenServer.call(Master,:handle_node_failure)
                 GenServer.cast(self(),{:remove_mate,the_one})
                 GenServer.cast(self(),{:add_new_mate,new_mate})
+                GenServer.cast(new_mate,{:add_new_mate,droid_name(x)})
                 GenServer.cast(self(),{:retry_gossip,{pid,i,j}})
     end
   end
